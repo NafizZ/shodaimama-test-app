@@ -1,0 +1,1 @@
+# shodaimama-test-app
