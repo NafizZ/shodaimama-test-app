@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'detail_screen.dart';
 import 'http/http_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -80,6 +81,8 @@ class _HomeScreenState extends State<HomeScreen> {
   // The controller for the ListView
   late ScrollController _controller;
 
+  
+
   @override
   void initState() {
     super.initState();
@@ -105,8 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ? const CircularProgressIndicator() 
       : Column(
         children: [
-            Expanded(
-              child: ListView.builder(
+          Expanded(
+            child: ListView.builder(
               itemCount: _itemList.length,
               controller: _controller,
               itemBuilder: (_, index) => Card(
@@ -114,6 +117,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListTile(
                   title: Text(_itemList[index]['id']),
                   subtitle: Text(_itemList[index]['author']),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailScreen(id: '${_itemList[index]['id']}', author: '${_itemList[index]['author']}', url: '${_itemList[index]['url']}', downloadUrl: '${_itemList[index]['download_url']}')),
+                    );
+                  },
                 ),
               ),
             ),
