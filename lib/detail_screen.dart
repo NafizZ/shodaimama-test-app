@@ -28,18 +28,18 @@ class DetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("id: $id"),
-            Text("author: $author"),
-            const Text("url: "),
+            Text("id: $id", style: const TextStyle(fontSize: 24,),),
+            Text("author: $author", style: const TextStyle(fontSize: 24,),),
+            const Text("url: ", style: TextStyle(fontSize: 24,),),
             TextButton(
-              child: Text(url),
+              child: Text(url, style: const TextStyle(fontSize: 18,),),
               onPressed: () {
                 openLink(link: url);
               }
             ),
-            const Text("downloadUrl:"),
+            const Text("downloadUrl:", style: TextStyle(fontSize: 24,),),
             TextButton(
-              child: Text(downloadUrl),
+              child: Text(downloadUrl, style: const TextStyle(fontSize: 18,),),
               onPressed: () {
                 openLink(link: downloadUrl);
               }
