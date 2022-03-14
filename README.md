@@ -1,6 +1,7 @@
 # shodaimama-test-app
 
 - A simple Flutter app that displays a list of items from API (The list item will contain only the id and author)
+[api link: https://picsum.photos/v2/list?page=pageNumber&limit=20]
 - Users can tap the item to see a detailed view of it (Full information can be found on the detail page)
 - Can get a list of items with infinite scrolling. Each hit will contain 20 items.
 - the image URLs are in clickable links
