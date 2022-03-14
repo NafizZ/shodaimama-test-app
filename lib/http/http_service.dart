@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart';
 
 class HttpService {
-  final String dataURL = "https://picsum.photos/v2/list?page=pageNumber&limit=20";
+  final String _dataURL = "https://picsum.photos/v2/list?";
 
-  Future<List> getData() async {
-    Response res = await get(Uri.parse(dataURL));
+  Future<List> getData(int pageNumber) async {
+    Response res = await get(Uri.parse("${_dataURL}page=$pageNumber&limit=20"));
 
     if (res.statusCode == 200) {
       List<dynamic> body = jsonDecode(res.body);

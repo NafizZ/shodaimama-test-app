@@ -10,50 +10,88 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // List temp = [{"id":"0","author":"Alejandro Escamilla","width":5616,"height":3744,"url":"https://unsplash.com/photos/yC-Yzbqy7PY","download_url":"https://picsum.photos/id/0/5616/3744"},
-  //              {"id":"1","author":"Alejandro Escamilla","width":5616,"height":3744,"url":"https://unsplash.com/photos/LNRyGwIJr5c","download_url":"https://picsum.photos/id/1/5616/3744"},
-  //              {"id":"10","author":"Paul Jarvis","width":2500,"height":1667,"url":"https://unsplash.com/photos/6J--NXulQCs","download_url":"https://picsum.photos/id/10/2500/1667"},
-  //              {"id":"100","author":"Tina Rataj","width":2500,"height":1656,"url":"https://unsplash.com/photos/pwaaqfoMibI","download_url":"https://picsum.photos/id/100/2500/1656"},
-  //              {"id":"1000","author":"Lukas Budimaier","width":5626,"height":3635,"url":"https://unsplash.com/photos/6cY-FvMlmkQ","download_url":"https://picsum.photos/id/1000/5626/3635"},
-  //              {"id":"1001","author":"Danielle MacInnes","width":5616,"height":3744,"url":"https://unsplash.com/photos/1DkWWN1dr-s","download_url":"https://picsum.photos/id/1001/5616/3744"},
-  //              {"id":"1002","author":"NASA","width":4312,"height":2868,"url":"https://unsplash.com/photos/6-jTZysYY_U","download_url":"https://picsum.photos/id/1002/4312/2868"},
-  //              {"id":"1003","author":"E+N Photographies","width":1181,"height":1772,"url":"https://unsplash.com/photos/GYumuBnTqKc","download_url":"https://picsum.photos/id/1003/1181/1772"},
-  //              {"id":"1004","author":"Greg Rakozy","width":5616,"height":3744,"url":"https://unsplash.com/photos/SSxIGsySh8o","download_url":"https://picsum.photos/id/1004/5616/3744"},
-  //              {"id":"1005","author":"Matthew Wiebe","width":5760,"height":3840,"url":"https://unsplash.com/photos/tBtuxtLvAZs","download_url":"https://picsum.photos/id/1005/5760/3840"},
-  //              {"id":"1006","author":"Vladimir Kudinov","width":3000,"height":2000,"url":"https://unsplash.com/photos/-wWRHIUklxM","download_url":"https://picsum.photos/id/1006/3000/2000"},
-  //              {"id":"1008","author":"Benjamin Combs","width":5616,"height":3744,"url":"https://unsplash.com/photos/5L4XAgMSno0","download_url":"https://picsum.photos/id/1008/5616/3744"},
-  //              {"id":"1009","author":"Christopher Campbell","width":5000,"height":7502,"url":"https://unsplash.com/photos/CMWRIzyMKZk","download_url":"https://picsum.photos/id/1009/5000/7502"},
-  //              {"id":"101","author":"Christian Bardenhorst","width":2621,"height":1747,"url":"https://unsplash.com/photos/8lMhzUjD1Wk","download_url":"https://picsum.photos/id/101/2621/1747"},
-  //              {"id":"1010","author":"Samantha Sophia","width":5184,"height":3456,"url":"https://unsplash.com/photos/NaWKMlp3tVs","download_url":"https://picsum.photos/id/1010/5184/3456"},
-  //              {"id":"1011","author":"Roberto Nickson","width":5472,"height":3648,"url":"https://unsplash.com/photos/7BjmDICVloE","download_url":"https://picsum.photos/id/1011/5472/3648"},
-  //              {"id":"1012","author":"Scott Webb","width":3973,"height":2639,"url":"https://unsplash.com/photos/uAgLGG1WBd4","download_url":"https://picsum.photos/id/1012/3973/2639"},
-  //              {"id":"1013","author":"Cayton Heath","width":4256,"height":2832,"url":"https://unsplash.com/photos/D8LcRLwZyPs","download_url":"https://picsum.photos/id/1013/4256/2832"},
-  //              {"id":"1014","author":"Oscar Keys","width":6016,"height":4000,"url":"https://unsplash.com/photos/AmPRUnRb6N0","download_url":"https://picsum.photos/id/1014/6016/4000"},
-  //              {"id":"1015","author":"Alexey Topolyanskiy","width":6000,"height":4000,"url":"https://unsplash.com/photos/-oWyJoSqBRM","download_url":"https://picsum.photos/id/1015/6000/4000"}
-  //             ];
-  bool isLoading = true; 
-  List itemList = [];
+  final List _itemList = [];
+
+  // At the beginning, we fetch the first 20 posts
+  int _page = 1;
+  // int _limit = 20;
+
+  // There is next page or not
+  bool _hasNextPage = true;
+
+  // Used to display loading indicators when _firstLoad function is running
+  bool _isFirstLoadRunning = false;
+
+  // Used to display loading indicators when _loadMore function is running
+  bool _isLoadMoreRunning = false;
 
   final HttpService httpService = HttpService();
 
-  getItemList() async{
-    var response = await httpService.getData();
-    for (var element in response) {
-       itemList.add(element );
+  // This function will be called when the app launches (see the initState function)
+  void _firstLoad() async {
+    try {
+      final response = await httpService.getData(_page);
+      // for (var element in response) {
+        _itemList.addAll(response);
+      // }
+    } catch (err) {
+      print('Something went wrong');
     }
 
-    print(' lenght of list: ${itemList.length}, response: $response');
     setState(() {
-      isLoading = false;
+      _isFirstLoadRunning = false;
     });
   }
 
+   // This function will be triggered whenver the user scroll
+  // to near the bottom of the list view
+  void _loadMore() async {
+    if (_hasNextPage == true &&
+        _isFirstLoadRunning == false &&
+        _isLoadMoreRunning == false &&
+        _controller.position.extentAfter < 300) {
+      setState(() {
+        _isLoadMoreRunning = true; // Display a progress indicator at the bottom
+      });
+      _page += 1; // Increase _page by 1
+      try {
+        final response = await httpService.getData(_page);
+        if (response.isNotEmpty) {
+          setState(() {
+              _itemList.addAll(response);
+          });
+        } else {
+          // This means there is no more data
+          // and therefore, we will not send another GET request
+          setState(() {
+            _hasNextPage = false;
+          });
+        }
+      } catch (err) {
+        print('Something went wrong!');
+      }
+
+      setState(() {
+        _isLoadMoreRunning = false;
+      });
+    }
+  }
+
+  // The controller for the ListView
+  late ScrollController _controller;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    isLoading = true;
-    getItemList();
+    _isFirstLoadRunning = true;
+    _firstLoad();
+    _controller = ScrollController()..addListener(_loadMore);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_loadMore);
+    super.dispose();
   }
   
   @override
@@ -63,15 +101,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
         title: const Text('Home page'),
       ),
-      body: isLoading ? const CircularProgressIndicator() : ListView.builder(
-        itemCount: itemList.length,
-        itemBuilder: (_, index) => Card(
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-          child: ListTile(
-            title: Text(itemList[index]['id']),
-            subtitle: Text(itemList[index]['author']),
+      body: _isFirstLoadRunning 
+      ? const CircularProgressIndicator() 
+      : Column(
+        children: [
+            Expanded(
+              child: ListView.builder(
+              itemCount: _itemList.length,
+              controller: _controller,
+              itemBuilder: (_, index) => Card(
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                child: ListTile(
+                  title: Text(_itemList[index]['id']),
+                  subtitle: Text(_itemList[index]['author']),
+                ),
+              ),
+            ),
           ),
-        ),
+          // when the _loadMore function is running
+          if (_isLoadMoreRunning == true)
+            // ignore: prefer_const_constructors
+            Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 40),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+
+          // When nothing else to load
+          if (_hasNextPage == false)
+            Container(
+              padding: const EdgeInsets.only(top: 30, bottom: 40),
+              color: Colors.amber,
+              child: const Center(
+                child: Text('You have fetched all of the content'),
+              ),
+            ),
+        ]
       ),
     );
   }
